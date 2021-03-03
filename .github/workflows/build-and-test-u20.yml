@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches:
+    - $default-branch
+    - dev
+    - test
+    - dan
+jobs:
+  build:
+    runs-on:
+      - jupyter-runner
+      - focal
+    steps:
+      - uses: actions/checkout@v2
+      - name: update system
+        run:
+          sudo apt-get update -y;
+          sudo apt-get upgrade -y;
+      - name: build thin image
+        run:
+          docker build -t bauman/alpine:3.13-jupyter-thin -f DockerfileThin . ;
+          docker push bauman/alpine:3.13-jupyter-thin ;
+      - name: build full image
+        run:
+          docker build -t bauman/alpine:3.13-jupyter-full -f DockerfileFull . ;
+          docker push bauman/alpine:3.13-jupyter-full ;

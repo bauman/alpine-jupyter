@@ -1,0 +1,56 @@
+FROM alpine:3.13
+
+RUN wget http://pkgs.bauman.space/alpine/dan-5bef6b5b.rsa.pub -O /etc/apk/keys/dan-5bef6b5b.rsa.pub
+RUN echo http://pkgs.bauman.space/alpine/3.13/packages/extras >> /etc/apk/repositories
+
+RUN apk add dumb-init \
+            ipython \
+            py3-pip py3-cffi py3-argon2-cffi \
+            py3-pyzmq \
+            py3-dateutil py3-tornado py3-pexpect \
+            py3-traitlets py3-jinja2 py3-bleach \
+            py3-wcwidth py3-traitlets py3-defusedxml \
+            py3-backcall py3-mistune py3-decorator \
+            py3-jsonschema py3-pygments py3-jedi \
+            py3-entrypoints py3-pickleshare py3-send2trash
+
+RUN pip3 install notebook
+
+# bloatware for specific needs
+RUN apk add py3-matplotlib py3-pandas py3-numpy \
+            py3-yaml py3-libxml2 \
+            py3-requests py3-paramiko \
+            py3-pymongo py3-discodb \
+            py3-pycryptodome py3-python-idzip \
+            py3-bsonsearch py3-clipspy py3-yara-python
+
+# this will pull in python3 dev so fortran2py converter works
+RUN apk add py3-scipy
+
+#compilers
+RUN apk add gcc yasm nasm cmake make build-base
+
+
+
+# Consistent with upstream Jupyter's username
+RUN adduser -D jovyan
+WORKDIR /home/jovyan
+
+
+RUN wget http://pkgs.bauman.space/whl/jupyter_asm_kernel-0.1.1-py3-none-any.whl && \
+    wget http://pkgs.bauman.space/whl/jupyter_c_kernel-1.2.3-py3-none-any.whl && \
+    pip3 install jupyter_c_kernel-1.2.3-py3-none-any.whl  && \
+    pip3 install jupyter_asm_kernel-0.1.1-py3-none-any.whl  && \
+    rm -rf *.whl && \
+    install_c_kernel  && \
+    install_asm_kernel && \
+    mv /root/.local/share/jupyter/kernels/c /usr/share/jupyter/kernels && \
+    mv /root/.local/share/jupyter/kernels/asm /usr/share/jupyter/kernels
+
+USER jovyan
+
+
+ENTRYPOINT  ["/usr/bin/dumb-init", "--"]
+CMD ["jupyter-notebook", "--ip=0.0.0.0"]
+
+

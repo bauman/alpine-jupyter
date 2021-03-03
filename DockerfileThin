@@ -1,0 +1,26 @@
+FROM alpine:3.13
+
+RUN wget http://pkgs.bauman.space/alpine/dan-5bef6b5b.rsa.pub -O /etc/apk/keys/dan-5bef6b5b.rsa.pub
+RUN echo http://pkgs.bauman.space/alpine/3.13/packages/extras >> /etc/apk/repositories
+
+RUN apk add dumb-init \
+            ipython \
+            py3-pip py3-cffi py3-argon2-cffi \
+            py3-pyzmq \
+            py3-dateutil py3-tornado py3-pexpect \
+            py3-traitlets py3-jinja2 py3-bleach \
+            py3-wcwidth py3-traitlets py3-defusedxml \
+            py3-backcall py3-mistune py3-decorator \
+            py3-jsonschema py3-pygments py3-jedi \
+            py3-entrypoints py3-pickleshare py3-send2trash
+
+RUN pip3 install notebook
+
+# Consistent with upstream Jupyter's username
+RUN adduser -D jovyan
+WORKDIR /home/jovyan
+USER jovyan
+
+ENTRYPOINT  ["/usr/bin/dumb-init", "--"]
+CMD ["jupyter-notebook", "--ip=\"*\""]
+

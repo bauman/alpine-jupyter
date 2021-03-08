@@ -22,7 +22,7 @@ RUN apk add py3-matplotlib py3-pandas py3-numpy \
             py3-requests py3-paramiko \
             py3-pymongo py3-discodb \
             py3-pycryptodome py3-python-idzip \
-            py3-bsonsearch py3-clipspy py3-yara-python
+            py3-bsonsearch py3-clipspy py3-yara-python bq
 
 # this will pull in python3 dev so fortran2py converter works
 RUN apk add py3-scipy
